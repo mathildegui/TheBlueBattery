@@ -12,14 +12,16 @@ import android.content.Intent
 import android.content.BroadcastReceiver
 import android.util.Log
 import android.content.IntentFilter
+import android.support.v4.content.LocalBroadcastManager
 import android.widget.*
 import android.widget.TextView
 import android.widget.AdapterView
 import kotlinx.android.synthetic.main.fragment_blank.*
 import java.util.*
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattService
-import android.content.ContentValues.TAG
+import com.mathildeguillossou.thebluebattery.ble.BLEService
+import android.bluetooth.BluetoothManager
+import android.support.design.widget.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 /**
@@ -32,6 +34,8 @@ import android.content.ContentValues.TAG
  */
 class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
 
+    val TAG: String = BlankFragment::class.java.simpleName
+
     var adapter: BluetoothAdapter? = null
 
     private var mListener: OnFragmentInteractionListener? = null
@@ -40,6 +44,10 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val filter = IntentFilter()
+        filter.addAction(BLEService.CONNECTION_STATE_CHANGE)
+        LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter)
 
         adapter = BluetoothAdapter.getDefaultAdapter()
 
@@ -75,6 +83,17 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
         Log.d("DEVICELIST", "Adapter created\n")
     }
 
+    // handler for received data from service
+    private val mBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == BLEService.CONNECTION_STATE_CHANGE) {
+                val status = intent.getIntExtra(BLEService.EXTRA_PARAM_STATUS, -1)
+                Log.d(TAG, "Status: " + status.toString())
+                // do something
+            }
+        }
+    }
+
     private val bReciever = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
@@ -92,6 +111,8 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
                 if(device.address.equals("00:11:67:2C:E8:F7")) {
                     //ConnectThread(device, UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")).connect()
                 }
+            } else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
+                mListener?.hide()
             }
         }
     }
@@ -116,9 +137,13 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
             Log.d("setOnClickListener", "click")
             val filter = IntentFilter()
             filter.addAction(BluetoothDevice.ACTION_FOUND)
+            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
             activity.registerReceiver(bReciever, filter)
 
-            adapter?.startDiscovery()
+
+            val mBluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val mBtAdapter = mBluetoothManager.adapter
+            mBtAdapter?.startDiscovery()
 
 
         })
@@ -198,6 +223,11 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
         mListener = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(mBroadcastReceiver)
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -210,6 +240,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
     interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         fun onFragmentInteraction(id: String)
+        fun hide()
     }
 
     companion object {

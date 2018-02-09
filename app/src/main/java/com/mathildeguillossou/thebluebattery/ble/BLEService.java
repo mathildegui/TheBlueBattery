@@ -1,32 +1,34 @@
-package com.mathildeguillossou.thebluebattery;
+package com.mathildeguillossou.thebluebattery.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.UUID;
 
-import static android.content.ContentValues.TAG;
+import javax.security.auth.callback.Callback;
 
 /**
  * @author mathildeguillossou on 02/11/2017
  */
 
 public class BLEService extends Service {
+
+    public static final String TAG = BLEService.class.getSimpleName();
+    public static final String CONNECTION_STATE_CHANGE = "CONNECTION_STATE_CHANGE";
+    public static final String EXTRA_PARAM_STATUS = "EXTRA_PARAM_STATUS";
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -36,24 +38,16 @@ public class BLEService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-
-
-
-
     }
 
-
     private UUID Battery_Service_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
-    private UUID Battery_Level_UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
-;
-    BluetoothManager mBluetoothManager;
-    BluetoothAdapter mBluetoothAdapter;
-    Handler mHandler;
+    private UUID Battery_Level_UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
+
+    private BluetoothManager mBluetoothManager;
+    private BluetoothAdapter mBluetoothAdapter;
 
     public boolean initialize() {
         // For API level 18 and above, get a reference to BluetoothAdapter through BluetoothManager.
-        mHandler = new Handler(getMainLooper());
         Log.i(TAG, "initialize is already called :  " + mBluetoothManager);
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -73,13 +67,10 @@ public class BLEService extends Service {
     }
 
     private String address;
+    private BluetoothGatt gatt;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //connect("00:11:67:2C:E8:F7");
-        //connect("F4:F5:D8:67:61:3F");
-        //connect("80:E4:DA:72:08:C4");
-        //connect("04:34:12:39:03:81");
         Log.d("startService", "startService");
 
 
@@ -89,8 +80,6 @@ public class BLEService extends Service {
 
         return super.onStartCommand(intent, flags, startId);
     }
-
-    BluetoothGatt gatt;
 
     public void connect(final String address) {
         /** FIXME
@@ -125,6 +114,13 @@ public class BLEService extends Service {
         gatt.readCharacteristic(batteryLevel);
     }
 
+    public void broadcastActionBaz(int status) {
+        Intent intent = new Intent(CONNECTION_STATE_CHANGE);
+        intent.putExtra(EXTRA_PARAM_STATUS, status);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        bm.sendBroadcast(intent);
+    }
+
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -136,7 +132,7 @@ public class BLEService extends Service {
             Log.d("onConnectionStateChange", "status: " + status + " - newState: " + newState);
             //if(newState == 0) connect("00:11:67:2C:E8:F7");
 
-
+            broadcastActionBaz(status);
 
 
             if(status == BluetoothGatt.GATT_SUCCESS && BluetoothProfile.STATE_CONNECTED == newState) gatt.discoverServices();
