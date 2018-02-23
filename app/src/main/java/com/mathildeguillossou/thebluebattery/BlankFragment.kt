@@ -19,9 +19,9 @@ import android.widget.AdapterView
 import kotlinx.android.synthetic.main.fragment_blank.*
 import java.util.*
 import com.mathildeguillossou.thebluebattery.ble.BLEService
-import android.bluetooth.BluetoothManager
-import android.support.design.widget.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
+import com.mathildeguillossou.thebluebattery.bluetooth.BindRequest
+import com.mathildeguillossou.thebluebattery.bluetooth.BluetoothService
+import com.mathildeguillossou.thebluebattery.bluetooth.ScanReceiver
 
 
 /**
@@ -32,7 +32,43 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Use the [BlankFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
+class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.ScanRequestListener, BindRequest.BindRequestListener {
+
+    fun scan(ble : BluetoothService) {
+        mAdapter?.clear()
+        ble.devices(this)
+        adapter?.bondedDevices!!
+                .map { DeviceItem(it?.name, it?.address, false) }
+                .forEach { mAdapter?.add(it) }
+    }
+
+    override fun onScanFinish() {
+        Log.d("SCAN", "onScanEnded")
+        mListener?.hide()
+//        hide()
+        //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onBindingSuccess() {
+        Log.d("SCAN", "onBindingSuccess")
+        //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onDeviceFound(device: BluetoothDevice?) {
+        Log.d("DEVICE FOUND", device.toString())
+        Log.d("DEVICE FOUND", device?.type.toString())
+        val newDevice = DeviceItem(device?.name, device?.address, false)
+        // Add it to our adapter
+
+        mAdapter?.add(newDevice)
+        mAdapter?.notifyDataSetChanged()
+//         //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onBindingFailed() {
+        Log.d("SCAN", "onBindingFailed")
+        //To change body of created functions use File | Settings | File Templates.
+    }
 
     val TAG: String = BlankFragment::class.java.simpleName
 
@@ -132,9 +168,9 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
         list!!.onItemClickListener = this
 
 
-        scan.setOnClickListener({
+        /*scan.setOnClickListener({
             mAdapter!!.clear()
-            Log.d("setOnClickListener", "click")
+            *//*Log.d("setOnClickListener", "click")
             val filter = IntentFilter()
             filter.addAction(BluetoothDevice.ACTION_FOUND)
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -143,10 +179,10 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
 
             val mBluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val mBtAdapter = mBluetoothManager.adapter
-            mBtAdapter?.startDiscovery()
+            mBtAdapter?.startDiscovery()*//*
 
-
-        })
+//            mListener?.discover()
+        })*/
 
         /*scan.setOnCheckedChangeListener { _ , isChecked ->
             val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
@@ -187,7 +223,8 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener!!.onFragmentInteraction(deviceItemList!![position].deviceName)
+            if(deviceItemList != null)
+                mListener?.onFragmentInteraction(deviceItemList!![position].deviceName)
 
 
             getbattery(deviceItemList!![position].address)
@@ -241,6 +278,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener {
         // TODO: Update argument type and name
         fun onFragmentInteraction(id: String)
         fun hide()
+        fun discover()
     }
 
     companion object {

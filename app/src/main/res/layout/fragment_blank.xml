@@ -20,17 +20,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#000"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:text="Scan"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#fff"
-        android:textSize="40dp"
-        android:id="@+id/scan"
-        android:layout_gravity="center_horizontal"
-        android:textOff="Scan"
-        android:textOn="Scanning..." />
 
     <ListView android:id="@android:id/list" android:layout_width="match_parent"
         android:layout_height="match_parent"

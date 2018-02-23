@@ -62,7 +62,11 @@ public class DeviceListAdapter extends ArrayAdapter<DeviceItem> {
 
         macAddress =  viewToUse.findViewById(R.id.macAddress);
         line =  viewToUse.findViewById(R.id.line);
-        holder.titleText.setText(item.deviceName);
+
+        String text;
+        if(item.deviceName != null) text = item.deviceName;
+        else text = item.address;
+        holder.titleText.setText(text);
         macAddress.setText(item.address);
 
         if (item.deviceName != null && item.deviceName.equals("No Devices")) {
