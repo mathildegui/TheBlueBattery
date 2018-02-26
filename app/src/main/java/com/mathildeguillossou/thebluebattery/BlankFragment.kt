@@ -83,6 +83,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
 
         val filter = IntentFilter()
         filter.addAction(BLEService.CONNECTION_STATE_CHANGE)
+        filter.addAction(BLEService.BATTERY)
         LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter)
 
         adapter = BluetoothAdapter.getDefaultAdapter()
