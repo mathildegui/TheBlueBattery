@@ -35,10 +35,11 @@ import com.mathildeguillossou.thebluebattery.bluetooth.ScanReceiver
 class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.ScanRequestListener, BindRequest.BindRequestListener {
 
     fun scan(ble : BluetoothService) {
+        Log.d("SCAN", "scan processing")
         mAdapter?.clear()
         ble.devices(this)
         adapter?.bondedDevices!!
-                .map { DeviceItem(it?.name, it?.address, false) }
+                .map { DeviceItem(it.name, it.address, false, 0) }
                 .forEach { mAdapter?.add(it) }
     }
 
@@ -57,12 +58,11 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     override fun onDeviceFound(device: BluetoothDevice?) {
         Log.d("DEVICE FOUND", device.toString())
         Log.d("DEVICE FOUND", device?.type.toString())
-        val newDevice = DeviceItem(device?.name, device?.address, false)
+        val newDevice = DeviceItem(device?.name, device?.address, false, 0)
         // Add it to our adapter
 
         mAdapter?.add(newDevice)
         mAdapter?.notifyDataSetChanged()
-//         //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onBindingFailed() {
@@ -75,7 +75,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     var adapter: BluetoothAdapter? = null
 
     private var mListener: OnFragmentInteractionListener? = null
-    private var mAdapter: ArrayAdapter<DeviceItem>? = null
+    private var mAdapter: DeviceListAdapter? = null
     private var deviceItemList: ArrayList<DeviceItem>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,7 +101,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
                 }
 
 
-                val newDevice = DeviceItem(device.name, device.address, false)
+                val newDevice = DeviceItem(device.name, device.address, false, 0)
                 deviceItemList!!.add(newDevice)
 
             }
@@ -109,12 +109,12 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
 
         // If there are no devices, add an item that states so. It will be handled in the view.
         if (deviceItemList!!.size == 0) {
-            deviceItemList!!.add(DeviceItem("No Devices", "", false))
+            deviceItemList!!.add(DeviceItem("No Devices", "", false, 0))
         }
 
         Log.d("DEVICELIST", "DeviceList populated\n")
 
-        mAdapter = DeviceListAdapter(context, deviceItemList)
+        mAdapter = DeviceListAdapter(context, R.layout.device_list_item, deviceItemList!!)
 
         Log.d("DEVICELIST", "Adapter created\n")
     }
@@ -126,6 +126,11 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
                 val status = intent.getIntExtra(BLEService.EXTRA_PARAM_STATUS, -1)
                 Log.d(TAG, "Status: " + status.toString())
                 // do something
+            } else if (intent.action == BLEService.BATTERY) {
+                val battery = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY, -1)
+                val position = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY_POSITION, -1)
+                Log.d(TAG, "Batterye: " + battery.toString())
+                mAdapter?.update(battery, position)
             }
         }
     }
@@ -138,7 +143,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
                 Log.d("DEVICELIST", "Bluetooth device found\n")
                 val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                 // Create a new device item
-                val newDevice = DeviceItem(device.name, device.address, false)
+                val newDevice = DeviceItem(device.name, device.address, false, 0)
                 // Add it to our adapter
                 mAdapter?.add(newDevice)
                 mAdapter?.notifyDataSetChanged()
@@ -166,71 +171,25 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         list.adapter = mAdapter
         // Set OnItemClickListener so we can be notified on item clicks
         list!!.onItemClickListener = this
-
-
-        /*scan.setOnClickListener({
-            mAdapter!!.clear()
-            *//*Log.d("setOnClickListener", "click")
-            val filter = IntentFilter()
-            filter.addAction(BluetoothDevice.ACTION_FOUND)
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-            activity.registerReceiver(bReciever, filter)
-
-
-            val mBluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            val mBtAdapter = mBluetoothManager.adapter
-            mBtAdapter?.startDiscovery()*//*
-
-//            mListener?.discover()
-        })*/
-
-        /*scan.setOnCheckedChangeListener { _ , isChecked ->
-            val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-            if (isChecked) {
-                mAdapter!!.clear()
-                activity.registerReceiver(bReciever, filter)
-                adapter?.startDiscovery()
-            } else {
-                activity.unregisterReceiver(bReciever)
-                adapter?.cancelDiscovery()
-            }
-        }*/
     }
 
-    fun getbattery(address: String) {
-        activity.startService(Intent(activity, BLEService::class.java).putExtra("address", address))
-        /*val batteryService = mBluetoothGatt.getService(Battery_Service_UUID)
-        if (batteryService == null) {
-            Log.d(TAG, "Battery service not found!")
-            return
-        }
-
-        val batteryLevel = batteryService!!.getCharacteristic(Battery_Level_UUID)
-        if (batteryLevel == null) {
-            Log.d(TAG, "Battery level not found!")
-            return
-        }
-        mBluetoothGatt.readCharacteristic(batteryLevel)
-        Log.v(TAG, "batteryLevel = " + mBluetoothGatt.readCharacteristic(batteryLevel))*/
+    fun getbattery(address: String, position: Int) {
+        activity.startService(Intent(activity, BLEService::class.java).putExtra("address", address).putExtra("position", position))
     }
 
 
     override
     fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-
         Log.d("DEVICELIST", "onItemClick position: " + position +
-                " id: " + id + " name: " + deviceItemList!![position].deviceName + "\n")
+                " id: " + id + " name: " + deviceItemList!![position].deviceName + "\n"+ deviceItemList!![position].address)
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             if(deviceItemList != null)
-                mListener?.onFragmentInteraction(deviceItemList!![position].deviceName)
+                deviceItemList!![position].address?.let { mListener?.onFragmentInteraction(it) }
 
-
-            getbattery(deviceItemList!![position].address)
-
+            getbattery(deviceItemList!![position].address!!, position)
         }
-
     }
 
     /**
@@ -276,7 +235,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
      */
     interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(id: String)
+        fun onFragmentInteraction(macAddress: String)
         fun hide()
         fun discover()
     }

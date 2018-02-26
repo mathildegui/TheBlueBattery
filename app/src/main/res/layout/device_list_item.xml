@@ -18,14 +18,14 @@
         android:paddingTop="3dp"
         android:textAlignment="center"
         android:textSize="30dp"
-        android:textColor="#fff"
+        android:textColor="@color/colorAccent"
         android:singleLine="true" />
 
     <View
         android:layout_width="250dp"
         android:layout_height="1dp"
         android:id="@+id/line"
-        android:background="#fff"
+        android:background="@color/colorPrimary"
         android:layout_below="@+id/titleTextView"
         />
     <TextView
@@ -41,5 +41,12 @@
         android:layout_alignEnd="@+id/titleTextView"
         android:textOff="Disconnect"
         android:textOn="Connect"
-        android:textColor="#fff" />
+        android:textColor="@color/colorAccent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/battery"
+        android:text="33.33%"
+        android:layout_alignParentEnd="true"/>
 </RelativeLayout>

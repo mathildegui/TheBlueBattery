@@ -5,11 +5,20 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.mathildeguillossou.thebluebattery.bluetooth.BindRequest
 import com.mathildeguillossou.thebluebattery.bluetooth.BluetoothService
 
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionListener {
+class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionListener, BindRequest.BindRequestListener {
+    override fun onBindingSuccess() {
+        Log.d("onBindingSuccess", "onBindingSuccess")
+    }
+
+    override fun onBindingFailed() {
+        Log.d("onBindingFailed", "onBindingFailed")
+    }
+
     override fun discover() {
         Log.d("SCAN", "discover")
 
@@ -46,8 +55,9 @@ class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionLis
         snackBar.dismiss()
     }
 
-    override fun onFragmentInteraction(id: String) {
+    override fun onFragmentInteraction(macAddress: String) {
         //To change body of created functions use File | Settings | File Templates.
+        //ble.bindDevice(macAddress, this)
     }
 
 }

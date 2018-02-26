@@ -27,7 +27,10 @@ public class BLEService extends Service {
 
     public static final String TAG = BLEService.class.getSimpleName();
     public static final String CONNECTION_STATE_CHANGE = "CONNECTION_STATE_CHANGE";
+    public static final String BATTERY = "BATTERY";
     public static final String EXTRA_PARAM_STATUS = "EXTRA_PARAM_STATUS";
+    public static final String EXTRA_PARAM_BATTERY = "EXTRA_PARAM_BATTERY";
+    public static final String EXTRA_PARAM_BATTERY_POSITION = "EXTRA_PARAM_BATTERY_POSITION";
 
     @Nullable
     @Override
@@ -67,6 +70,7 @@ public class BLEService extends Service {
     }
 
     private String address;
+    private Integer position;
     private BluetoothGatt gatt;
 
     @Override
@@ -75,6 +79,7 @@ public class BLEService extends Service {
 
 
         address = intent.getStringExtra("address");
+        position = intent.getIntExtra("position", -1);
         if(initialize() && !address.isEmpty())
             connect(address);
 
@@ -121,6 +126,14 @@ public class BLEService extends Service {
         bm.sendBroadcast(intent);
     }
 
+    public void broadcastActionBattery(int batterylevel) {
+        Intent intent = new Intent(BATTERY);
+        intent.putExtra(EXTRA_PARAM_BATTERY, batterylevel);
+        intent.putExtra(EXTRA_PARAM_BATTERY_POSITION, position);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        bm.sendBroadcast(intent);
+    }
+
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -149,7 +162,13 @@ public class BLEService extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
             Log.d("onCharacteristicRead", "status: " + status);
-            Log.d("onCharacteristicRead", "value: " + characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0));
+            try {
+                int value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+                Log.d("onCharacteristicRead", "value: " + value);
+                broadcastActionBattery(value);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
