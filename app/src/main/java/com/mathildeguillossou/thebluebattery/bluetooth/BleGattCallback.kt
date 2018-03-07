@@ -3,8 +3,10 @@ package com.mathildeguillossou.thebluebattery.bluetooth
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import java.util.*
 
@@ -50,7 +52,7 @@ class BleGattCallback : BluetoothGattCallback() {
             val value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)!!
             Log.d("onCharacteristicRead", "value battery: $value")
             //FIXME - Update the battery - Send a broadcast
-            // broadcastActionBattery(value);
+//             broadcastActionBattery(value);
         } catch (e: Exception) {
             e.printStackTrace()
         }

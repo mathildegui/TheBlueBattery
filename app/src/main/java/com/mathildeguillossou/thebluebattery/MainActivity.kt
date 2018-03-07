@@ -4,29 +4,11 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import com.mathildeguillossou.thebluebattery.bluetooth.BindRequest
 import com.mathildeguillossou.thebluebattery.bluetooth.BluetoothService
 
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionListener, BindRequest.BindRequestListener {
-    override fun onBindingSuccess() {
-        Log.d("onBindingSuccess", "onBindingSuccess")
-//        ble.connect(macAddress)
-    }
-
-    override fun onBindingFailed() {
-        Log.d("onBindingFailed", "onBindingFailed")
-    }
-
-    override fun discover(macAddress: String?, name: String?) {
-        Log.d("SCAN", "discover")
-            Log.d(TAG, "connect to BIXI_Bxx")
-            ble.connect(macAddress)
-//        ble.bindDevice(macAddress, this)
-    }
-
+class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionListener {
     private val TAG: String = MainActivity::class.java.simpleName
 
     lateinit var snackBar: Snackbar
@@ -43,7 +25,6 @@ class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionLis
 
         supportFragmentManager.beginTransaction().replace(R.id.container, BlankFragment.newInstance()).commit()
 
-
         fab.setOnClickListener { view ->
             snackBar = Snackbar.make(view, "Processing ...", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Action", null)
@@ -53,14 +34,11 @@ class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionLis
         }
     }
 
+    override fun connect(address: String?) {
+        ble.connect(address)
+    }
+
     override fun hide() {
-        Log.d(TAG, "hide")
         snackBar.dismiss()
     }
-
-    override fun onFragmentInteraction(macAddress: String) {
-        //To change body of created functions use File | Settings | File Templates.
-        //ble.bindDevice(macAddress, this)
-    }
-
 }
