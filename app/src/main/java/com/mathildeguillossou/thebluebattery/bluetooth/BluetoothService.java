@@ -6,10 +6,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-
-import com.mathildeguillossou.thebluebattery.ble.BLEService;
 
 import java.util.UUID;
 
@@ -56,37 +53,24 @@ public class BluetoothService {
             return null;
         }
     }
+    boolean alreadyCalled = false;
 
-    /*@Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("startService", "startService");
-
-
-        address = intent.getStringExtra("address");
-        if(initialize() && !address.isEmpty())
-            connect(address);
-
-        return super.onStartCommand(intent, flags, startId);
-    }
 
     public void connect(final String address) {
-        *//** FIXME
-         * 1. The device has Public address
-         2. The device with given address has been scanned at least once before the connectGatt method is called.
-         *//*
+//        bindDevice()
 
-        gatt = mBluetoothAdapter.getRemoteDevice(address)
-                .connectGatt(BLEService.this, false, callback);
-        *//*for(BluetoothDevice de : mBluetoothAdapter.getBondedDevices()) {
-            Log.d("de", de.toString() + " - Name: " + de.getName());
-            if(de.getAddress().equals(address)) de.connectGatt(BLEService.this, false, callback);
-        }*//*
-    }*/
+//            if(BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).createBond()) {
+                Log.d(TAG, "connecting to ... " + address);
+                gatt = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).connectGatt(this.context, true, new BleGattCallback());
+//            }
+        alreadyCalled = true;
+//        if(gatt != null) getBattery();
+    }
 
-    private void getBattery(BluetoothGatt gatt) {
+    /*public void getBattery() {
         Log.d("GATT", gatt.getServices() != null ? gatt.getServices().size() + "" : "0");
 
-        BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
+        BluetoothGattService batteryService = this.gatt.getService(Battery_Service_UUID);
         if (batteryService == null) {
             Log.d(TAG, "Battery service not found!");
             return;
@@ -98,5 +82,5 @@ public class BluetoothService {
             return;
         }
         gatt.readCharacteristic(batteryLevel);
-    }
+    }*/
 }

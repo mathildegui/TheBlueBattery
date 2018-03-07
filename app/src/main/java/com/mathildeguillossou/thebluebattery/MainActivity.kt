@@ -13,15 +13,18 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionListener, BindRequest.BindRequestListener {
     override fun onBindingSuccess() {
         Log.d("onBindingSuccess", "onBindingSuccess")
+//        ble.connect(macAddress)
     }
 
     override fun onBindingFailed() {
         Log.d("onBindingFailed", "onBindingFailed")
     }
 
-    override fun discover() {
+    override fun discover(macAddress: String?, name: String?) {
         Log.d("SCAN", "discover")
-
+            Log.d(TAG, "connect to BIXI_Bxx")
+            ble.connect(macAddress)
+//        ble.bindDevice(macAddress, this)
     }
 
     private val TAG: String = MainActivity::class.java.simpleName

@@ -17,7 +17,6 @@ import android.widget.TextView
 import android.widget.AdapterView
 import kotlinx.android.synthetic.main.fragment_blank.*
 import java.util.*
-import com.mathildeguillossou.thebluebattery.ble.BLEService
 import com.mathildeguillossou.thebluebattery.bluetooth.BindRequest
 import com.mathildeguillossou.thebluebattery.bluetooth.BluetoothService
 import com.mathildeguillossou.thebluebattery.bluetooth.ScanReceiver
@@ -38,7 +37,6 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         mAdapter?.clear()
         ble.devices(this)
 
-
         adapter?.bondedDevices!!
                 .map { DeviceItem(it.name, it.address, false, 0) }
                 .forEach { mAdapter?.add(it) }
@@ -57,7 +55,6 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     }
 
     override fun onDeviceFound(device: BluetoothDevice?) {
-
         Log.d("DEVICE FOUND", device.toString())
 //        if(device != null) {
 
@@ -92,8 +89,8 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         super.onCreate(savedInstanceState)
 
         val filter = IntentFilter()
-        filter.addAction(BLEService.CONNECTION_STATE_CHANGE)
-        filter.addAction(BLEService.BATTERY)
+        /*filter.addAction(BLEService.CONNECTION_STATE_CHANGE)
+        filter.addAction(BLEService.BATTERY)*/
         LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter)
 
         adapter = BluetoothAdapter.getDefaultAdapter()
@@ -104,17 +101,10 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         if (pairedDevices!!.size > 0) {
             for (device in pairedDevices) {
                 Log.d("address to ", device.address)
-                if(device.address == "00:11:67:2C:E8:F7") {
-                    Log.d("connec to ", "00:11:67:2C:E8:F7")
-                    //ConnectThread(device, UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")).connect()
-                } else {
-                    Log.d("NO connec to", "00:11:67:2C:E8:F7")
-                }
 
 
                 val newDevice = DeviceItem(device.name, device.address, false, 0)
                 deviceItemList!!.add(newDevice)
-
             }
         }
 
@@ -133,16 +123,16 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     // handler for received data from service
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == BLEService.CONNECTION_STATE_CHANGE) {
-                val status = intent.getIntExtra(BLEService.EXTRA_PARAM_STATUS, -1)
-                Log.d(TAG, "Status: " + status.toString())
-                // do something
-            } else if (intent.action == BLEService.BATTERY) {
-                val battery = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY, -1)
-                val position = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY_POSITION, -1)
-                Log.d(TAG, "Batterye: " + battery.toString())
-                mAdapter?.update(battery, position)
-            }
+//            if (intent.action == BLEService.CONNECTION_STATE_CHANGE) {
+//                val status = intent.getIntExtra(BLEService.EXTRA_PARAM_STATUS, -1)
+//                Log.d(TAG, "Status: " + status.toString())
+//                // do something
+//            } else if (intent.action == BLEService.BATTERY) {
+//                val battery = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY, -1)
+//                val position = intent.getIntExtra(BLEService.EXTRA_PARAM_BATTERY_POSITION, -1)
+//                Log.d(TAG, "Batterye: " + battery.toString())
+//                mAdapter?.update(battery, position)
+//            }
         }
     }
 
@@ -185,7 +175,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     }
 
     fun getbattery(address: String, position: Int) {
-        activity.startService(Intent(activity, BLEService::class.java).putExtra("address", address).putExtra("position", position))
+//        activity.startService(Intent(activity, BLEService::class.java).putExtra("address", address).putExtra("position", position))
     }
 
 
@@ -199,7 +189,8 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
             if(deviceItemList != null)
                 deviceItemList!![position].address?.let { mListener?.onFragmentInteraction(it) }
 
-            getbattery(deviceItemList!![position].address!!, position)
+            mListener?.discover(deviceItemList!![position].address, deviceItemList!![position].deviceName)
+//            getbattery(deviceItemList!![position].address!!, position)
         }
     }
 
@@ -248,7 +239,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         // TODO: Update argument type and name
         fun onFragmentInteraction(macAddress: String)
         fun hide()
-        fun discover()
+        fun discover(macAddress: String?, name: String?)
     }
 
     companion object {
