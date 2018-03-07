@@ -13,7 +13,6 @@ import android.content.BroadcastReceiver
 import android.util.Log
 import android.content.IntentFilter
 import android.support.v4.content.LocalBroadcastManager
-import android.widget.*
 import android.widget.TextView
 import android.widget.AdapterView
 import kotlinx.android.synthetic.main.fragment_blank.*
@@ -38,6 +37,8 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         Log.d("SCAN", "scan processing")
         mAdapter?.clear()
         ble.devices(this)
+
+
         adapter?.bondedDevices!!
                 .map { DeviceItem(it.name, it.address, false, 0) }
                 .forEach { mAdapter?.add(it) }
@@ -56,13 +57,22 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
     }
 
     override fun onDeviceFound(device: BluetoothDevice?) {
-        Log.d("DEVICE FOUND", device.toString())
-        Log.d("DEVICE FOUND", device?.type.toString())
-        val newDevice = DeviceItem(device?.name, device?.address, false, 0)
-        // Add it to our adapter
 
-        mAdapter?.add(newDevice)
-        mAdapter?.notifyDataSetChanged()
+        Log.d("DEVICE FOUND", device.toString())
+//        if(device != null) {
+
+            Log.d("DEVICE FOUND", device?.type.toString())
+            Log.d("DEVICE FOUND", device?.name.toString())
+            Log.d("DEVICE FOUND", device?.address.toString())
+//            if (!device.name.isNullOrEmpty() && !device.address.isNullOrEmpty()) {
+                val newDevice = DeviceItem(device?.name, device?.address, false, 0)
+                // Add it to our adapter
+                if (!mAdapter!!.list().contains(newDevice)) {
+                    mAdapter?.add(newDevice)
+                    mAdapter?.notifyDataSetChanged()
+                }
+//            }
+//        }
     }
 
     override fun onBindingFailed() {

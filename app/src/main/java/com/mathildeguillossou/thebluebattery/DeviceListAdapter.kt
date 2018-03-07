@@ -10,7 +10,7 @@ import android.widget.TextView
 /**
  * @author mathildeguillossou on 26/02/2018
  */
-class DeviceListAdapter(context: Context, var resource: Int, list: ArrayList<DeviceItem>) :
+class DeviceListAdapter(context: Context, var resource: Int, private var list: ArrayList<DeviceItem>) :
         ArrayAdapter<DeviceItem>(context, resource, list) {
 
     /**
@@ -53,9 +53,11 @@ class DeviceListAdapter(context: Context, var resource: Int, list: ArrayList<Dev
     }
 
     fun update(battery : Int, position: Int) {
-
-
         getItem(position).battery = battery
         notifyDataSetChanged()
+    }
+
+    fun list():  ArrayList<DeviceItem> {
+        return list
     }
 }

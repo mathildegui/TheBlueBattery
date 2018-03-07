@@ -80,19 +80,21 @@ public class BLEService extends Service {
 
         address = intent.getStringExtra("address");
         position = intent.getIntExtra("position", -1);
-        if(initialize() && !address.isEmpty())
-            connect(address);
+        if(initialize() && !address.isEmpty()) {
+            BluetoothGatt gatt = connect(address);
+            getBAttery(gatt);
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
-    public void connect(final String address) {
+    public BluetoothGatt connect(final String address) {
         /** FIXME
          * 1. The device has Public address
          2. The device with given address has been scanned at least once before the connectGatt method is called.
          */
 
-        gatt = mBluetoothAdapter.getRemoteDevice(address)
+        return gatt = mBluetoothAdapter.getRemoteDevice(address)
                 .connectGatt(BLEService.this, false, callback);
         /*for(BluetoothDevice de : mBluetoothAdapter.getBondedDevices()) {
             Log.d("de", de.toString() + " - Name: " + de.getName());
