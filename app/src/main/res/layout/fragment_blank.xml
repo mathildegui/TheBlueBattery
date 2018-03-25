@@ -5,22 +5,6 @@
     android:orientation="vertical"
     >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Devices"
-        android:textColor="@color/colorPrimary"
-        android:textSize="60sp"
-        android:id="@+id/textView"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginBottom="2dp"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorPrimary"/>
-
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
