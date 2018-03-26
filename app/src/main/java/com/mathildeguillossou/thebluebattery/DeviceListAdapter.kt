@@ -25,8 +25,8 @@ class DeviceListAdapter(context: Context, var resource: Int, private var list: A
     private var vi: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
-        var holder: Holder
-        var retView: View
+        val holder: Holder
+        val retView: View
 
         val (deviceName, address, _, battery) = getItem(position)
 
@@ -45,7 +45,9 @@ class DeviceListAdapter(context: Context, var resource: Int, private var list: A
             retView = convertView
         }
 
-        holder.name?.text = deviceName
+        val name = deviceName ?: "¯\\_(ツ)_/¯"
+
+        holder.name?.text = name
         holder.address?.text = address
         holder.battery?.text = battery.toString()
 

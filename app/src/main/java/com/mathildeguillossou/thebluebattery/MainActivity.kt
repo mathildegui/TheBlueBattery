@@ -31,14 +31,16 @@ class MainActivity : AppCompatActivity(), BlankFragment.OnFragmentInteractionLis
             snackBar.show()
             fragment = supportFragmentManager.findFragmentById(R.id.container)
             (fragment as BlankFragment).scan(ble)
+            Helper.rotate(fab)
         }
     }
 
-    override fun connect(address: String?) {
-        ble.connect(address)
+    override fun connect(address: String?, position: Int) {
+        ble.connect(address, position)
     }
 
     override fun hide() {
         snackBar.dismiss()
+        fab.clearAnimation()
     }
 }

@@ -2,6 +2,7 @@ package com.mathildeguillossou.thebluebattery.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.util.Log;
 
 /**
  * @author mathilde
@@ -31,7 +32,8 @@ public class BluetoothService {
         return new ScanReceiver(this.context, bt(), listener);
     }
 
-    public void connect(final String address) {
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).connectGatt(this.context, true, new BleGattCallback());
+    public void connect(final String address, int position) {
+        Log.d("BLE Class", BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).getBluetoothClass().getClass().getSimpleName());
+        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).connectGatt(this.context, false, new BleGattCallback(context, position));
     }
 }

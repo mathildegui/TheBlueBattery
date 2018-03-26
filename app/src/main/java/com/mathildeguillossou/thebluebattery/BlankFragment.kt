@@ -8,12 +8,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattService
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.util.Log
 import android.content.IntentFilter
 import android.support.v4.content.LocalBroadcastManager
 import android.widget.AdapterView
+import com.mathildeguillossou.thebluebattery.bluetooth.BleGattCallback
 import kotlinx.android.synthetic.main.fragment_blank.*
 import java.util.*
 import com.mathildeguillossou.thebluebattery.bluetooth.BluetoothService
@@ -44,9 +46,9 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         mAdapter?.clear()
         ble.devices(this)
 
-        adapter?.bondedDevices!!
+        /*adapter?.bondedDevices!!
                 .map { DeviceItem(it.name, it.address, false, 0) }
-                .forEach { mAdapter?.add(it) }
+                .forEach { mAdapter?.add(it) }*/
     }
 
     override fun onScanFinish() {
@@ -60,21 +62,23 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         if (!mAdapter!!.list().contains(newDevice)) {
             mAdapter?.add(newDevice)
             mAdapter?.notifyDataSetChanged()
+
+            BluetoothAdapter.getDefaultAdapter().getRemoteDevice(device?.address)
+                    .connectGatt(this.context, false, BleGattCallback(context, mAdapter!!.getPosition(newDevice)))
         }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val filter = IntentFilter()
-//        filter.addAction(BluetoothService.BATTERY)
-        LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter)
+        LocalBroadcastManager.getInstance(this.activity).registerReceiver(mBroadcastReceiver, IntentFilter(BleGattCallback.ACTION_BATTERY))
 
         adapter = BluetoothAdapter.getDefaultAdapter()
 
 
         deviceItemList = ArrayList()
-        val pairedDevices = adapter?.bondedDevices
+        /*val pairedDevices = adapter?.bondedDevices
         if (pairedDevices!!.size > 0) {
             for (device in pairedDevices) {
                 Log.d("paired device", "address to ${device.address}")
@@ -82,23 +86,25 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
                 val newDevice = DeviceItem(device.name, device.address, false, 0)
                 deviceItemList!!.add(newDevice)
             }
-        }
+        }*/
 
         // If there are no devices, add an item that states so. It will be handled in the view.
-        if (deviceItemList!!.size == 0)
-            deviceItemList!!.add(DeviceItem("No Devices", "", false, 0))
+//        if (deviceItemList!!.size == 0)
+//            deviceItemList!!.add(DeviceItem("No Devices", "", false, 0))
         mAdapter = DeviceListAdapter(context, R.layout.device_list_item, deviceItemList!!)
     }
 
     // handler for received data from service
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            /*if (intent.action == BluetoothService.BATTERY) {
-                val battery = intent.getIntExtra(BluetoothService.EXTRA_PARAM_BATTERY, -1)
-                val position = intent.getIntExtra(BluetoothService.EXTRA_PARAM_BATTERY_POSITION, -1)
-                Log.d(TAG, "Batterye: " + battery.toString())
-                mAdapter?.update(battery, position)
-            }*/
+            Log.d(TAG, "Battery: " + intent.action)
+            Log.d(TAG, "Battery: " + BleGattCallback.ACTION_BATTERY)
+            if (intent.action == BleGattCallback.ACTION_BATTERY) {
+                val battery = intent.getIntExtra(BleGattCallback.EXTRA_PARAM_BATTERY, -1)
+                val position = intent.getIntExtra(BleGattCallback.EXTRA_PARAM_POSITION, -1)
+                Log.d(TAG, "Battery: " + battery.toString())
+                if(position != -1) mAdapter?.update(battery, position)
+            }
         }
     }
 
@@ -121,8 +127,9 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            if(deviceItemList != null)
-                deviceItemList!![position].address?.let { mListener?.connect(it) }
+            if(deviceItemList != null) {
+                deviceItemList!![position].address?.let { mListener?.connect(it, position) }
+            }
 
         }
     }
@@ -143,7 +150,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
 
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(mBroadcastReceiver)
+        LocalBroadcastManager.getInstance(this.activity).unregisterReceiver(mBroadcastReceiver)
     }
 
     /**
@@ -157,7 +164,7 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
      */
     interface OnFragmentInteractionListener {
         fun hide()
-        fun connect(address: String?)
+        fun connect(address: String?, position: Int)
     }
 
     companion object {
