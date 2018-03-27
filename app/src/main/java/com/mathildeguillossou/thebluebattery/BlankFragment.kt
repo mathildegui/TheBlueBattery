@@ -78,19 +78,6 @@ class BlankFragment : Fragment(), AdapterView.OnItemClickListener, ScanReceiver.
 
 
         deviceItemList = ArrayList()
-        /*val pairedDevices = adapter?.bondedDevices
-        if (pairedDevices!!.size > 0) {
-            for (device in pairedDevices) {
-                Log.d("paired device", "address to ${device.address}")
-
-                val newDevice = DeviceItem(device.name, device.address, false, 0)
-                deviceItemList!!.add(newDevice)
-            }
-        }*/
-
-        // If there are no devices, add an item that states so. It will be handled in the view.
-//        if (deviceItemList!!.size == 0)
-//            deviceItemList!!.add(DeviceItem("No Devices", "", false, 0))
         mAdapter = DeviceListAdapter(context, R.layout.device_list_item, deviceItemList!!)
     }
 
